@@ -1,53 +1,103 @@
 <template>
 <section class="hero is-primary">
   <div class="hero-body">
-    <button class="button is-link" v-on:click="startVideo">
+    <button class="button is-link" @click="startVideo">
       <i class="material-icons">start</i>
       <i class="fab fa-github"></i>
     </button>
-    <button class="button is-link" v-on:click="stopVideo">
+    <button class="button is-danger" @click="stopVideo">
       <i class="material-icons">stop</i>
       <i class="fab fa-github"></i>
     </button>
+    <button class="button is-info" @click="takePhoto" >
+      shoot
+    </button>
+    <button class="button is-success" @click="submit" >
+      submit
+    </button>
     <br />
     <video id="local_video" autoplay></video> 
-    <!-- <canvas :id="photoContainer" :value="{{photo}}"/> -->
+    <canvas id="photoContainer" />
+    <img id="photo">
   </div>
 </section>
 </template>
 <script>
 
-
+import CONSTANTS from '../assets/constants.js'
 export default {
     data(){
       return{
         photo:null,
-        stream:null
+        stream:null,
+        usedFlg:false
       }
     },
     methods:{
-        startVideo:function(event){
+        startVideo(){
             const self = this
             let localVideo = document.getElementById('local_video');
-            let localStream;
+            if(self.usedFlg) return
             navigator.mediaDevices.getUserMedia({video: true, audio: false})
             .then(function (stream) { // success
-              localStream = stream;
-              self.stream = localStream
-              localVideo.src = window.URL.createObjectURL(self.stream);
+              self.usedFlg = true
+              self.stream = stream
+              localVideo.srcObject = self.stream
             }).catch(function (error) { // error
-              console.error('mediaDevice.getUserMedia() error:', error);
-              return;
+              console.error('mediaDevice.getUserMedia() error:', error)
+              return
             })
         },
-        takePhoto:function(event){
+        takePhoto(){
+          if(!this.usedFlg) return
+          let video  = document.getElementById('local_video')
+          let canvas = document.getElementById('photoContainer')
+			    let img = document.getElementById('photo')
 
+          let ctx = canvas.getContext('2d')
+			    //videoの縦幅横幅を取得
+			    let w = video.offsetWidth
+			    let h = video.offsetHeight
+
+			    //同じサイズをcanvasに指定
+			    canvas.setAttribute("width", w)
+			    canvas.setAttribute("height", h)
+
+			    //canvasにコピー
+			    ctx.drawImage(video, 0, 0, w, h)
+			    //imgにpng形式で書き出し
+          img.src = canvas.toDataURL('image/png')
+          ctx.clearRect(0, 0, w, h)     
+               
         },
-        stopVideo:function(event){
+        stopVideo(){
           if (null !== self.stream){
             const self = this
-            self.stream.getTracks().forEach(track => track.stop());
+            self.usedFlg = false
+            self.stream.getTracks().forEach(track => track.stop())
 
+          }
+        },
+        async submit(){
+          let imgSrc = document.getElementById("photo").src
+        
+          const self = this
+          console.log(self)
+          try{
+            let headers = {headers:CONSTANTS.HEADER}
+            console.log(headers)
+            let response = await self.$axios.$post(CONSTANTS.API_URL,self.createParam(imgSrc),headers)
+            console.log(response)
+          }catch(error){
+            console.log(error)
+          }
+        },
+        createParam(imgSrc){
+          return {
+            api_key:"",
+            api_secret:"",
+            image_url:imgSrc,
+            return_landmark:1
           }
         }
     }
@@ -58,6 +108,10 @@ export default {
   #local_video{
     width:100%;
     height:100%;
-    opacity:0.8;
   }
+  
+  /* #photo #photo_Container{
+    width:400px;
+    height:300px;
+  } */
 </style>
