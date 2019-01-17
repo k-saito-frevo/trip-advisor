@@ -79,12 +79,10 @@ export default {
           }
         },
         async submit(){
-          let imgSrc = document.getElementById("photo").src
-        
+          let imgSrc = document.getElementById("photo").src        
           const self = this
-          console.log(self)
           try{
-            let headers = {headers:CONSTANTS.HEADER}
+            let headers = {headers:{"Access-Control-Allow-Origin":"*"}}
             console.log(headers)
             let response = await self.$axios.$post(CONSTANTS.API_URL,self.createParam(imgSrc),headers)
             console.log(response)
