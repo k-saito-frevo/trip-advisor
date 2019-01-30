@@ -83,8 +83,13 @@ export default {
           const self = this
           try{
             let headers = {headers:{"Access-Control-Allow-Origin":"*"}}
-            console.log(headers)
-            let response = await self.$axios.$post(CONSTANTS.API_URL,self.createParam(imgSrc),headers)
+            // console.log(headers)
+            //let response = await self.$axios.$post(self.createURL(CONSTANTS.API_URL,self.createParam(imgSrc)),headers)
+            self.$axios.baseURL = CONSTANTS.API_URL
+            console.log(self.$axios)
+            console.log(imgSrc)
+            let response = await self.$axios.$post(CONSTANTS.API_URL,imgSrc,headers)
+            
             console.log(response)
           }catch(error){
             console.log(error)
@@ -92,11 +97,17 @@ export default {
         },
         createParam(imgSrc){
           return {
-            api_key:"",
-            api_secret:"",
-            image_url:imgSrc,
-            return_landmark:1
+            image_file:imgSrc
           }
+        },
+        judge(response){
+          //判定
+        },
+        createURL(str,arr){
+          for(let i=0;i<arr.length;i++){
+            str = str.replace(`{${i}}`,arr[i])
+          }
+          return str
         }
     }
 }
@@ -104,8 +115,8 @@ export default {
 
 <style>
   #local_video{
-    width:100%;
-    height:100%;
+    width:60%;
+    height:40%;
   }
   
   /* #photo #photo_Container{
