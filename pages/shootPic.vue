@@ -26,6 +26,10 @@
 
 import CONSTANTS from '../assets/constants.js'
 export default {
+    mounted(){
+      const self = this 
+      self.startVideo()
+    },
     data(){
       return{
         photo:null,
@@ -115,10 +119,15 @@ export default {
 
 <style>
   #local_video{
-    width:60%;
-    height:40%;
+    top:15%;right: 0; bottom: 0; left: 0;
+    position: absolute;
+    min-width: 100%;
+    min-height: 100%;
+    pointer-events: none;
   }
-  
+  #photo{
+    display:none;
+  }
   /* #photo #photo_Container{
     width:400px;
     height:300px;
